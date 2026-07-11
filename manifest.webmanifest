@@ -1,0 +1,13 @@
+{
+  "name": "Operation Visible Abs",
+  "short_name": "Visible Abs",
+  "description": "A private, offline-first daily consistency tracker.",
+  "start_url": "./#today",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080b0a",
+  "theme_color": "#080b0a",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

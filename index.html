@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b0a">
+  <meta name="description" content="A private, offline-first daily consistency tracker.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>Operation Visible Abs</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#today" aria-label="Operation Visible Abs home">
+      <span class="brand-mark">OVA</span>
+      <span><strong>Operation</strong><small>Visible Abs</small></span>
+    </a>
+    <button id="installButton" class="ghost hidden" type="button">Install app</button>
+  </header>
+
+  <main>
+    <section id="today" class="view active" aria-labelledby="todayTitle">
+      <div class="hero">
+        <div>
+          <p id="todayDate" class="eyebrow"></p>
+          <h1 id="todayTitle">Today</h1>
+          <p class="lede">The plan is yours. This is just the scoreboard.</p>
+        </div>
+        <div class="level-card" aria-label="Current level and XP">
+          <div class="level-orbit"><strong id="levelNumber">1</strong><span>Level</span></div>
+          <div class="level-copy">
+            <span id="levelName">Foundation</span>
+            <small id="xpLabel">0 / 100 XP</small>
+            <div class="progress"><i id="xpProgress"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel quests-panel">
+        <div class="section-head">
+          <div><p class="eyebrow">Daily focus</p><h2>Quests</h2></div>
+          <button id="addQuestButton" class="accent" type="button">+ New quest</button>
+        </div>
+        <div id="questList" class="quest-list"></div>
+        <p id="emptyQuests" class="empty">No quests yet. Add only what you actually intend to do.</p>
+      </section>
+
+      <section class="metrics-grid" aria-label="Daily health logs">
+        <article class="panel metric-card" data-metric="weight">
+          <div class="metric-icon">KG</div><p>Weight</p>
+          <div class="metric-value"><strong id="weightValue">—</strong><span>kg</span></div>
+          <button class="metric-edit" type="button" data-open-metric="weight">Log weight</button>
+        </article>
+        <article class="panel metric-card" data-metric="steps">
+          <div class="metric-icon">ST</div><p>Steps</p>
+          <div class="metric-value"><strong id="stepsValue">—</strong><span>steps</span></div>
+          <button class="metric-edit" type="button" data-open-metric="steps">Log steps</button>
+        </article>
+        <article class="panel metric-card" data-metric="water">
+          <div class="metric-icon">H₂O</div><p>Water</p>
+          <div class="metric-value"><strong id="waterValue">—</strong><span>litres</span></div>
+          <button class="metric-edit" type="button" data-open-metric="water">Log water</button>
+        </article>
+        <article class="panel metric-card" data-metric="sleep">
+          <div class="metric-icon">ZZ</div><p>Sleep</p>
+          <div class="metric-value"><strong id="sleepValue">—</strong><span>hours</span></div>
+          <button class="metric-edit" type="button" data-open-metric="sleep">Log sleep</button>
+        </article>
+      </section>
+
+      <section class="panel movement-panel">
+        <div><p class="eyebrow">Training status</p><h2>What was today?</h2><p>Record the day without prescribing the session.</p></div>
+        <div class="segment" role="group" aria-label="Workout or rest status">
+          <button type="button" data-day-type="workout">Workout</button>
+          <button type="button" data-day-type="rest">Rest</button>
+          <button type="button" data-day-type="clear">Clear</button>
+        </div>
+        <label class="notes-label">Optional note<textarea id="dayNote" rows="2" maxlength="280" placeholder="Your own note about the day"></textarea></label>
+        <button id="saveNote" class="ghost save-note" type="button">Save note</button>
+      </section>
+    </section>
+
+    <section id="progress" class="view" aria-labelledby="progressTitle">
+      <p class="eyebrow">Your record</p><h1 id="progressTitle">Progress</h1>
+      <div class="summary-grid">
+        <article class="panel summary"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong></article>
+        <article class="panel summary"><span>Quests completed</span><strong id="questsComplete">0</strong></article>
+        <article class="panel summary"><span>Days logged</span><strong id="daysLogged">0</strong></article>
+      </div>
+      <section class="panel history-panel"><div class="section-head"><div><p class="eyebrow">Recent entries</p><h2>History</h2></div></div><div id="historyList"></div></section>
+    </section>
+
+    <section id="settings" class="view" aria-labelledby="settingsTitle">
+      <p class="eyebrow">Local control</p><h1 id="settingsTitle">Data & backup</h1>
+      <section class="panel settings-panel">
+        <div><h2>Your data stays here</h2><p>Entries are stored in this browser. Export a backup before changing devices or clearing browser data.</p></div>
+        <div class="settings-actions">
+          <button id="exportButton" class="accent" type="button">Export backup</button>
+          <label class="ghost file-button">Restore backup<input id="importInput" type="file" accept="application/json,.json"></label>
+        </div>
+        <p id="storageStatus" class="status" role="status"></p>
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <a href="#today" class="active"><span>●</span>Today</a>
+    <a href="#progress"><span>↗</span>Progress</a>
+    <a href="#settings"><span>⚙</span>Data</a>
+  </nav>
+
+  <dialog id="questDialog">
+    <form id="questForm" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">Create your own</p><h2>New quest</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div>
+      <label>Quest name<input id="questName" required maxlength="80" autocomplete="off" placeholder="What will you complete?"></label>
+      <label>XP reward<select id="questXp"><option value="10">10 XP · Light</option><option value="20" selected>20 XP · Standard</option><option value="30">30 XP · Stretch</option></select></label>
+      <button class="accent full" value="default" type="submit">Add to today</button>
+    </form>
+  </dialog>
+
+  <dialog id="metricDialog">
+    <form id="metricForm" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">Today</p><h2 id="metricTitle">Log metric</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div>
+      <label><span id="metricLabel">Value</span><input id="metricInput" required type="number" inputmode="decimal"></label>
+      <button class="accent full" value="default" type="submit">Save entry</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
