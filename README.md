@@ -1,4 +1,4 @@
-# Operation Visible Abs
+# GoalRPG
 
 An offline-first personal consistency tracker. It uses plain HTML, CSS, and JavaScript with local browser storage; there are no runtime dependencies or accounts.
 
@@ -14,4 +14,4 @@ Then open `http://localhost:4173`.
 
 ## Data
 
-All entries stay in local browser storage under `ova-data-v1`. Use **Data → Export backup** regularly. Restoring a backup replaces the current local dataset.
+All entries stay in local browser storage under `ova-data-v1`. Use **Data → Export GoalRPG backup** regularly. Restoring a backup replaces the current local dataset.

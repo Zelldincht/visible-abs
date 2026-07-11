@@ -6,16 +6,16 @@
   <meta name="theme-color" content="#080b0a">
   <meta name="description" content="A private, offline-first daily consistency tracker.">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="icon" href="icons/goalrpg.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/goalrpg.png">
   <link rel="stylesheet" href="styles.css">
-  <title>Operation Visible Abs</title>
+  <title>GoalRPG</title>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#today" aria-label="Operation Visible Abs home">
-      <span class="brand-mark">OVA</span>
-      <span><strong>Operation</strong><small>Visible Abs</small></span>
+    <a class="brand" href="#today" aria-label="GoalRPG home">
+      <img class="brand-icon" src="icons/goalrpg.png" alt="">
+      <span><strong>GoalRPG</strong><small>Level up daily</small></span>
     </a>
     <button id="installButton" class="ghost hidden" type="button">Install app</button>
   </header>
@@ -97,7 +97,7 @@
       <section class="panel settings-panel">
         <div><h2>Your data stays here</h2><p>Entries are stored in this browser. Export a backup before changing devices or clearing browser data.</p></div>
         <div class="settings-actions">
-          <button id="exportButton" class="accent" type="button">Export backup</button>
+          <button id="exportButton" class="accent" type="button">Export GoalRPG backup</button>
           <label class="ghost file-button">Restore backup<input id="importInput" type="file" accept="application/json,.json"></label>
         </div>
         <p id="storageStatus" class="status" role="status"></p>

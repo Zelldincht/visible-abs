@@ -121,9 +121,9 @@ function showRoute() {
 addEventListener('hashchange', showRoute); showRoute();
 
 document.querySelector('#exportButton').addEventListener('click', () => {
-  const payload = { ...data, exportedAt: new Date().toISOString(), app: 'Operation Visible Abs' };
+  const payload = { ...data, exportedAt: new Date().toISOString(), app: 'GoalRPG' };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `operation-visible-abs-backup-${localDateKey()}.json`; a.click(); URL.revokeObjectURL(url); toast('Backup exported');
+  const a = document.createElement('a'); a.href = url; a.download = `goalrpg-backup-${localDateKey()}.json`; a.click(); URL.revokeObjectURL(url); toast('Backup exported');
 });
 document.querySelector('#importInput').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
@@ -132,7 +132,7 @@ document.querySelector('#importInput').addEventListener('change', async e => {
     if (restored.schemaVersion !== SCHEMA_VERSION || !restored.days || typeof restored.days !== 'object') throw new Error('Invalid backup');
     data = { schemaVersion: SCHEMA_VERSION, createdAt: restored.createdAt || new Date().toISOString(), days: restored.days };
     saveData(); document.querySelector('#storageStatus').textContent = `Restored ${Object.keys(data.days).length} day entries from ${file.name}.`; toast('Backup restored');
-  } catch { document.querySelector('#storageStatus').textContent = 'That file is not a valid Operation Visible Abs backup.'; }
+  } catch { document.querySelector('#storageStatus').textContent = 'That file is not a valid GoalRPG backup.'; }
   e.target.value = '';
 });
 
