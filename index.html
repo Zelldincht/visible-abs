@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15131d">
   <meta name="description" content="A private, offline-first daily consistency tracker.">
-  <link rel="manifest" href="manifest.webmanifest?v=7">
+  <link rel="manifest" href="manifest.webmanifest?v=9">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=9">
   <title>GoalRPG</title>
 </head>
 <body>
@@ -26,7 +26,7 @@
         <div class="hero-art" aria-hidden="true"><img src="icons/avatar-stage-1.png" alt=""><span>STAGE 1 · STARTING OUT</span></div>
         <div class="hero-copy">
           <p id="todayDate" class="eyebrow"></p>
-          <h1 id="todayTitle">Today's Orders</h1>
+          <h1 id="todayTitle">Today's Quests</h1>
           <p class="lede">Your character. Your objectives. Your progress.</p>
         </div>
         <div class="level-card" aria-label="Current level and XP">
@@ -40,7 +40,7 @@
 
       <section class="panel quests-panel">
         <div class="section-head">
-          <div><p class="eyebrow">Daily quest board</p><h2>Today's goals</h2><span id="questCounter" class="quest-counter">0 / 0 COMPLETE</span></div>
+          <div><p class="eyebrow">Daily quest board</p><h2>Quest Log</h2><span id="questCounter" class="quest-counter">0 / 0 COMPLETE</span><div class="quest-board-progress"><i id="questBoardProgress"></i></div></div>
           <button id="addQuestButton" class="accent" type="button">+ New quest</button>
         </div>
         <div id="questList" class="quest-list"></div>
@@ -179,6 +179,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=7" defer></script>
+  <script src="app.js?v=9" defer></script>
 </body>
 </html>

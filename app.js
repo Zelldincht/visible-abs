@@ -23,6 +23,21 @@ function getDay(key = todayKey) {
   if (!data.days[key]) data.days[key] = { quests: [], metrics: {}, dayType: null, note: '' };
   return data.days[key];
 }
+function seedTemporaryQuests() {
+  if (data.demoSeeded) return;
+  const day = getDay();
+  if (!day.quests.length) {
+    day.quests.push(
+      { id: 'starter-weight', name: 'Log weight', xp: 10, completed: false },
+      { id: 'starter-steps', name: "Log today's steps", xp: 10, completed: false },
+      { id: 'starter-water', name: 'Log water', xp: 10, completed: false },
+      { id: 'starter-sleep', name: 'Log sleep', xp: 10, completed: false },
+      { id: 'starter-training', name: 'Choose workout or rest', xp: 20, completed: false }
+    );
+  }
+  data.demoSeeded = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 function loadData() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -62,6 +77,7 @@ function renderToday() {
   list.innerHTML = (day.quests || []).map(q => `<div class="quest ${q.completed ? 'completed' : ''}"><input class="quest-check" type="checkbox" data-quest-id="${q.id}" ${q.completed ? 'checked' : ''} aria-label="Complete ${safeText(q.name)}"><span class="quest-title">${safeText(q.name)}</span><span class="quest-xp">+${q.xp} XP</span><button class="delete-quest" data-delete-quest="${q.id}" aria-label="Delete ${safeText(q.name)}">×</button></div>`).join('');
   document.querySelector('#emptyQuests').hidden = Boolean(day.quests?.length);
   document.querySelector('#questCounter').textContent = (day.quests || []).filter(q => q.completed).length + ' / ' + (day.quests || []).length + ' COMPLETE';
+  document.querySelector('#questBoardProgress').style.width = (day.quests || []).length ? ((day.quests || []).filter(q => q.completed).length / (day.quests || []).length * 100) + '%' : '0%';
   for (const metric of Object.keys(METRICS)) {
     const value = day.metrics?.[metric];
     document.querySelector(`#${metric}Value`).textContent = value === undefined ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });
@@ -156,4 +172,5 @@ addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt
 document.querySelector('#installButton').addEventListener('click', async () => { if (!installPrompt) return; installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; document.querySelector('#installButton').classList.add('hidden'); });
 addEventListener('appinstalled', () => toast('App installed'));
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+seedTemporaryQuests();
 renderAll();
