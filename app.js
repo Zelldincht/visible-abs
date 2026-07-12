@@ -11,6 +11,8 @@ const emptyData = () => ({ schemaVersion: SCHEMA_VERSION, createdAt: new Date().
 let data = loadData();
 let selectedMetric = null;
 let installPrompt = null;
+let testLevel = Number(sessionStorage.getItem('goalrpg-test-level')) || null;
+const LEVEL_TITLES = ['Starting Out', 'First Steps', 'Momentum', 'Consistent', 'Committed', 'Disciplined', 'Athlete', 'Champion', 'Guardian', 'Legend'];
 const todayKey = localDateKey();
 
 function localDateKey(date = new Date()) {
@@ -55,9 +57,15 @@ function levelInfo(xp) {
   const level = Math.floor(Math.sqrt(xp / 50)) + 1;
   const start = 50 * (level - 1) ** 2;
   const end = 50 * level ** 2;
-  const names = ['Foundation', 'Momentum', 'Discipline', 'Consistency', 'Resolve', 'Unshakeable'];
-  return { level, start, end, progress: ((xp - start) / (end - start)) * 100, name: names[Math.min(level - 1, names.length - 1)] };
+  return { level, start, end, progress: ((xp - start) / (end - start)) * 100, name: LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)] };
 }
+function displayLevelInfo() {
+  const earned = levelInfo(lifetimeXp());
+  if (!testLevel) return { ...earned, isTest: false };
+  const level = Math.max(1, Math.min(10, testLevel));
+  return { level, start: 50 * (level - 1) ** 2, end: 50 * level ** 2, progress: 0, name: LEVEL_TITLES[level - 1], isTest: true };
+}
+function avatarPath(level) { return `icons/avatar-level-${String(Math.max(1, Math.min(10, level))).padStart(2, '0')}.png`; }
 function safeText(value) { const el = document.createElement('span'); el.textContent = value; return el.innerHTML; }
 function toast(message) {
   const el = document.querySelector('#toast'); el.textContent = message; el.classList.add('show');
@@ -68,11 +76,13 @@ function renderAll() { renderToday(); renderProgress(); }
 function renderToday() {
   const day = getDay();
   document.querySelector('#todayDate').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
-  const xp = lifetimeXp(); const info = levelInfo(xp);
+  const xp = lifetimeXp(); const info = displayLevelInfo();
   document.querySelector('#levelNumber').textContent = info.level;
   document.querySelector('#levelName').textContent = info.name;
-  document.querySelector('#xpLabel').textContent = `${xp - info.start} / ${info.end - info.start} XP`;
+  document.querySelector('#xpLabel').textContent = info.isTest ? `TEST LEVEL ${info.level} · ${xp} REAL XP` : `${xp - info.start} / ${info.end - info.start} XP`;
   document.querySelector('#xpProgress').style.width = `${info.progress}%`;
+  document.querySelector('#todayAvatar').src = avatarPath(info.level);
+  document.querySelector('#avatarStageLabel').textContent = `LEVEL ${info.level} · ${info.name}`;
   const list = document.querySelector('#questList');
   list.innerHTML = (day.quests || []).map(q => `<div class="quest ${q.completed ? 'completed' : ''}"><input class="quest-check" type="checkbox" data-quest-id="${q.id}" ${q.completed ? 'checked' : ''} aria-label="Complete ${safeText(q.name)}"><span class="quest-title">${safeText(q.name)}</span><span class="quest-xp">+${q.xp} XP</span><button class="delete-quest" data-delete-quest="${q.id}" aria-label="Delete ${safeText(q.name)}">×</button></div>`).join('');
   document.querySelector('#emptyQuests').hidden = Boolean(day.quests?.length);
@@ -91,11 +101,14 @@ function renderProgress() {
   document.querySelector('#lifetimeXp').textContent = lifetimeXp().toLocaleString();
   document.querySelector('#questsComplete').textContent = Object.values(data.days).reduce((n,d) => n + (d.quests || []).filter(q=>q.completed).length, 0);
   document.querySelector('#daysLogged').textContent = days.length;
-  const characterInfo = levelInfo(lifetimeXp());
+  const characterInfo = displayLevelInfo();
   document.querySelector('#characterLevel').textContent = characterInfo.level;
-  document.querySelector('#characterXp').textContent = `${lifetimeXp() - characterInfo.start} / ${characterInfo.end - characterInfo.start} XP`;
-  document.querySelector('#characterXpProgress').style.width = `${characterInfo.progress}%`;
+  document.querySelector('#characterXp').textContent = characterInfo.isTest ? 'TEST LEVEL ' + characterInfo.level + ' · ' + lifetimeXp() + ' REAL XP' : (lifetimeXp() - characterInfo.start) + ' / ' + (characterInfo.end - characterInfo.start) + ' XP';
+document.querySelector('#characterXpProgress').style.width = `${characterInfo.progress}%`;
   document.querySelector('#characterTitleName').textContent = characterInfo.name;
+  document.querySelector('#characterAvatar').src = avatarPath(characterInfo.level);
+  document.querySelector('#avatarCaptionTitle').textContent = 'Level ' + characterInfo.level + ' · ' + characterInfo.name;
+  document.querySelector('#testLevelLabel').textContent = characterInfo.isTest ? characterInfo.level : 'Earned';
   const characterAttributes = {
     activity: Math.min(100, Object.values(data.days).filter(d => d.dayType === 'workout').length * 10 + Object.values(data.days).filter(d => d.metrics?.steps !== undefined).length * 5),
     recovery: Math.min(100, Object.values(data.days).filter(d => d.dayType === 'rest').length * 10 + Object.values(data.days).filter(d => d.metrics?.sleep !== undefined).length * 5),
@@ -144,6 +157,16 @@ document.querySelectorAll('[data-day-type]').forEach(button => button.addEventLi
 }));
 document.querySelector('#saveNote').addEventListener('click', () => { getDay().note = document.querySelector('#dayNote').value.trim(); saveData(); toast('Note saved'); });
 
+function setTestLevel(nextLevel) {
+  testLevel = Math.max(1, Math.min(10, nextLevel));
+  sessionStorage.setItem('goalrpg-test-level', testLevel);
+  renderAll(); toast(`Test avatar: level ${testLevel}`);
+}
+document.querySelector('#testLevelUp').addEventListener('click', () => setTestLevel((testLevel || levelInfo(lifetimeXp()).level) + 1));
+document.querySelector('#testLevelDown').addEventListener('click', () => setTestLevel((testLevel || levelInfo(lifetimeXp()).level) - 1));
+document.querySelector('#testLevelReset').addEventListener('click', () => {
+  testLevel = null; sessionStorage.removeItem('goalrpg-test-level'); renderAll(); toast('Using earned level');
+});
 function showRoute() {
   const route = location.hash.slice(1) || 'today';
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === route));

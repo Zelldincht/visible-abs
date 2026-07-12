@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15131d">
   <meta name="description" content="A private, offline-first daily consistency tracker.">
-  <link rel="manifest" href="manifest.webmanifest?v=13">
+  <link rel="manifest" href="manifest.webmanifest?v=14">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
   <title>GoalRPG</title>
 </head>
 <body>
@@ -23,7 +23,7 @@
   <main>
     <section id="today" class="view active" aria-labelledby="todayTitle">
       <div class="hero">
-        <div class="hero-art" aria-hidden="true"><img src="icons/avatar-stage-1.png" alt=""><span>STAGE 1 · STARTING OUT</span></div>
+        <div class="hero-art" aria-hidden="true"><img id="todayAvatar" src="icons/avatar-level-01.png" alt=""><span id="avatarStageLabel">STAGE 1 · STARTING OUT</span></div>
         <div class="hero-copy">
           <p id="todayDate" class="eyebrow"></p>
           <h1 id="todayTitle">Today's Quests</h1>
@@ -112,10 +112,14 @@
 
     <section id="character" class="view" aria-labelledby="characterTitle">
       <div class="page-title"><div><p class="eyebrow">Your journey</p><h1 id="characterTitle">Character</h1></div><a class="ghost settings-link" href="#settings">Data & settings</a></div>
+      <section class="panel test-level-panel" aria-label="Avatar test controls">
+        <div><span>TEST MODE</span><strong>Avatar preview level <b id="testLevelLabel">Earned</b></strong><small>This changes display only. Real XP and backups are unaffected.</small></div>
+        <div class="test-level-actions"><button id="testLevelDown" class="ghost" type="button">− Level</button><button id="testLevelUp" class="accent" type="button">+ Level</button><button id="testLevelReset" class="ghost" type="button">Use earned level</button></div>
+      </section>
       <div class="character-grid">
         <section class="panel avatar-panel">
-          <div class="avatar-frame"><img src="icons/avatar-stage-1.png" alt="Your current GoalRPG avatar at the starting stage"></div>
-          <div class="avatar-caption"><span>Current form</span><strong>Stage 1 · Starting Out</strong></div>
+          <div class="avatar-frame"><img id="characterAvatar" src="icons/avatar-level-01.png" alt="Your current GoalRPG avatar"></div>
+          <div class="avatar-caption"><span>Current form</span><strong id="avatarCaptionTitle">Level 1 · Starting Out</strong></div>
         </section>
         <section class="panel character-stats">
           <p class="eyebrow">Character sheet</p>
@@ -179,6 +183,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=14" defer></script>
 </body>
 </html>
