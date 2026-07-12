@@ -1,7 +1,7 @@
 {
   "name": "GoalRPG",
   "short_name": "GoalRPG",
-  "description": "A private, offline-first daily consistency tracker.",
+  "description": "A retro campaign manager for completing your daily protocol.",
   "start_url": "./#today",
   "scope": "./",
   "display": "standalone",

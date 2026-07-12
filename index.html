@@ -3,186 +3,99 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#15131d">
-  <meta name="description" content="A private, offline-first daily consistency tracker.">
-  <link rel="manifest" href="manifest.webmanifest?v=14">
+  <meta name="theme-color" content="#171522">
+  <meta name="description" content="GoalRPG is a retro campaign manager for completing your daily protocol.">
+  <link rel="manifest" href="manifest.webmanifest?v=20">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="styles.css?v=20">
   <title>GoalRPG</title>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#today" aria-label="GoalRPG home">
-      <img class="brand-icon" src="icons/goalrpg.png" alt="">
-      <span><strong>GoalRPG</strong><small>Level up daily</small></span>
-    </a>
-    <button id="installButton" class="ghost hidden" type="button">Install app</button>
+    <a class="brand" href="#today"><img src="icons/goalrpg.png" alt=""><span><strong>GoalRPG</strong><small>Campaign Manager</small></span></a>
+    <div class="mini-level"><span>LV <b id="headerLevel">1</b></span><div><i id="headerXpBar"></i></div></div>
+    <button id="installButton" class="pixel-button secondary hidden" type="button">Install</button>
   </header>
 
   <main>
     <section id="today" class="view active" aria-labelledby="todayTitle">
-      <div class="hero">
-        <div class="hero-art" aria-hidden="true"><img id="todayAvatar" src="icons/avatar-level-01.png" alt=""><span id="avatarStageLabel">STAGE 1 · STARTING OUT</span></div>
-        <div class="hero-copy">
-          <p id="todayDate" class="eyebrow"></p>
-          <h1 id="todayTitle">Today's Quests</h1>
-          <p class="lede">Your character. Your objectives. Your progress.</p>
+      <section class="campaign-card pixel-panel">
+        <div class="campaign-copy"><p class="kicker">Active campaign</p><h1 id="campaignName">Operation Visible Abs</h1><p id="todayDate" class="campaign-date"></p><p class="directive">Complete today's protocol.</p></div>
+        <div class="level-block"><span>Level</span><strong id="levelNumber">1</strong><small id="levelName">Starting Out</small></div>
+        <div class="xp-block"><div class="bar-label"><span>Experience</span><b id="xpLabel">0 / 50 XP</b></div><div class="progress xp-progress"><i id="xpProgress"></i><em></em></div></div>
+        <div class="campaign-stats">
+          <article><span>Current weight</span><strong id="currentWeight">—</strong><small>kg</small></article>
+          <article><span>Target weight</span><strong id="targetWeight">—</strong><small>kg</small></article>
+          <article><span>Current streak</span><strong id="currentStreak">0</strong><small>days</small></article>
+          <article><span>Campaign</span><strong id="campaignPercent">0%</strong><small>complete</small></article>
         </div>
-        <div class="level-card" aria-label="Current level and XP">
-          <div class="level-orbit"><strong id="levelNumber">1</strong><span>Level</span></div>
-          <div class="level-copy">
-            <span id="levelName">Foundation</span>
-            <small id="xpLabel">0 / 100 XP</small>
-            <div class="progress"><i id="xpProgress"></i></div>
-          </div>
-        </div>
+        <div class="progress campaign-progress"><i id="campaignProgress"></i></div>
+      </section>
 
-      <section class="panel quests-panel">
-        <div class="section-head">
-          <div><p class="eyebrow">Daily quest board</p><h2>Quest Log</h2><span id="questCounter" class="quest-counter">0 / 0 COMPLETE</span><div class="quest-board-progress"><i id="questBoardProgress"></i></div></div>
-          <button id="addQuestButton" class="accent" type="button">+ New quest</button>
-        </div>
+      <section class="quest-board pixel-panel">
+        <div class="section-heading"><div><p class="kicker">Daily protocol</p><h2 id="todayTitle">Today's Quests</h2><span id="questCounter">0 / 0 complete</span></div><button id="addQuestButton" class="pixel-button" type="button">+ Quest</button></div>
+        <div class="progress daily-progress"><i id="questBoardProgress"></i></div>
         <div id="questList" class="quest-list"></div>
-        <p id="emptyQuests" class="empty">No quests yet. Add only what you actually intend to do.</p>
-      </section>
-      </div>
-
-      <section class="metrics-grid" aria-label="Daily health logs">
-        <article class="panel metric-card" data-metric="weight">
-          <div class="metric-icon">KG</div><p>Weight</p>
-          <div class="metric-value"><strong id="weightValue">—</strong><span>kg</span></div>
-          <button class="metric-edit" type="button" data-open-metric="weight">Log weight</button>
-        </article>
-        <article class="panel metric-card" data-metric="steps">
-          <div class="metric-icon">ST</div><p>Steps</p>
-          <div class="metric-value"><strong id="stepsValue">—</strong><span>steps</span></div>
-          <button class="metric-edit" type="button" data-open-metric="steps">Log steps</button>
-        </article>
-        <article class="panel metric-card" data-metric="water">
-          <div class="metric-icon">H₂O</div><p>Water</p>
-          <div class="metric-value"><strong id="waterValue">—</strong><span>litres</span></div>
-          <button class="metric-edit" type="button" data-open-metric="water">Log water</button>
-        </article>
-        <article class="panel metric-card" data-metric="sleep">
-          <div class="metric-icon">ZZ</div><p>Sleep</p>
-          <div class="metric-value"><strong id="sleepValue">—</strong><span>hours</span></div>
-          <button class="metric-edit" type="button" data-open-metric="sleep">Log sleep</button>
-        </article>
+        <p id="emptyQuests" class="empty">No protocol quests defined.</p>
+        <div id="perfectDayBonus" class="perfect-bonus"><span>★ Perfect Day</span><strong>+250 XP</strong></div>
       </section>
 
-      <section class="panel movement-panel">
-        <div><p class="eyebrow">Training status</p><h2>What was today?</h2><p>Record the day without prescribing the session.</p></div>
-        <div class="segment" role="group" aria-label="Workout or rest status">
-          <button type="button" data-day-type="workout">Workout</button>
-          <button type="button" data-day-type="rest">Rest</button>
-          <button type="button" data-day-type="clear">Clear</button>
-        </div>
-        <label class="notes-label">Optional note<textarea id="dayNote" rows="2" maxlength="280" placeholder="Your own note about the day"></textarea></label>
-        <button id="saveNote" class="ghost save-note" type="button">Save note</button>
+      <section class="quick-log" aria-label="Quick logs">
+        <button type="button" data-open-metric="weight"><span>Weight</span><strong id="weightValue">—</strong></button>
+        <button type="button" data-open-metric="steps"><span>Steps</span><strong id="stepsValue">—</strong></button>
+        <button type="button" data-open-metric="water"><span>Water</span><strong id="waterValue">—</strong></button>
+        <button type="button" data-open-metric="sleep"><span>Sleep</span><strong id="sleepValue">—</strong></button>
       </section>
     </section>
 
-    <section id="nutrition" class="view" aria-labelledby="nutritionTitle">
-      <div class="page-title"><div><p class="eyebrow">Fuel log</p><h1 id="nutritionTitle">Nutrition</h1></div><span class="screen-badge">PLAYER DEFINED</span></div>
-      <section class="panel empty-feature">
-        <div class="feature-pixel">N</div>
-        <div><h2>No nutrition plan defined</h2><p>Your targets and meals will appear here only after you add them. GoalRPG will not create meals or meal times for you.</p></div>
-        <span class="coming-tag">NEXT BUILD</span>
+    <section id="statistics" class="view" aria-labelledby="statisticsTitle">
+      <div class="page-heading"><p class="kicker">Permanent record</p><h1 id="statisticsTitle">Statistics</h1></div>
+      <section class="record-grid">
+        <article class="pixel-panel record"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong><div class="progress"><i id="statXpProgress"></i></div><small id="nextLevelStat">Next level</small></article>
+        <article class="pixel-panel record"><span>Perfect Days</span><strong id="perfectDays">0</strong><div class="progress"><i id="perfectDaysProgress"></i></div><small id="perfectDaysNext">Next: 1</small></article>
+        <article class="pixel-panel record"><span>Longest Streak</span><strong id="longestStreak">0</strong><div class="progress"><i id="streakProgress"></i></div><small id="streakNext">Next: 3</small></article>
+        <article class="pixel-panel record"><span>Gym Sessions</span><strong id="gymSessions">0</strong><div class="progress"><i id="gymProgress"></i></div><small id="gymNext">Next: 1</small></article>
+        <article class="pixel-panel record"><span>Meals Completed</span><strong id="mealsCompleted">0</strong><div class="progress"><i id="mealProgress"></i></div><small id="mealNext">Next: 1</small></article>
+        <article class="pixel-panel record"><span>Weight Lost</span><strong id="weightLost">0 kg</strong><div class="progress"><i id="weightProgress"></i></div><small>Campaign progress</small></article>
       </section>
     </section>
 
-    <section id="training" class="view" aria-labelledby="trainingTitle">
-      <div class="page-title"><div><p class="eyebrow">Training log</p><h1 id="trainingTitle">Training</h1></div><span class="screen-badge">PLAYER DEFINED</span></div>
-      <section class="panel empty-feature">
-        <div class="feature-pixel">T</div>
-        <div><h2>No training plan defined</h2><p>Your own exercises and sessions will live here when you create them. GoalRPG will not prescribe exercises or a workout schedule.</p></div>
-        <span class="coming-tag">NEXT BUILD</span>
-      </section>
-    </section>
-    <section id="progress" class="view" aria-labelledby="progressTitle">
-      <p class="eyebrow">Your record</p><h1 id="progressTitle">Progress</h1>
-      <div class="summary-grid">
-        <article class="panel summary"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong></article>
-        <article class="panel summary"><span>Quests completed</span><strong id="questsComplete">0</strong></article>
-        <article class="panel summary"><span>Days logged</span><strong id="daysLogged">0</strong></article>
-      </div>
-      <section class="panel history-panel"><div class="section-head"><div><p class="eyebrow">Recent entries</p><h2>History</h2></div></div><div id="historyList"></div></section>
+    <section id="achievements" class="view" aria-labelledby="achievementsTitle">
+      <div class="page-heading"><p class="kicker">Milestones</p><h1 id="achievementsTitle">Achievements</h1></div>
+      <section id="achievementList" class="achievement-list"></section>
     </section>
 
-    <section id="character" class="view" aria-labelledby="characterTitle">
-      <div class="page-title"><div><p class="eyebrow">Your journey</p><h1 id="characterTitle">Character</h1></div><a class="ghost settings-link" href="#settings">Data & settings</a></div>
-      <section class="panel test-level-panel" aria-label="Avatar test controls">
-        <div><span>TEST MODE</span><strong>Avatar preview level <b id="testLevelLabel">Earned</b></strong><small>This changes display only. Real XP and backups are unaffected.</small></div>
-        <div class="test-level-actions"><button id="testLevelDown" class="ghost" type="button">− Level</button><button id="testLevelUp" class="accent" type="button">+ Level</button><button id="testLevelReset" class="ghost" type="button">Use earned level</button></div>
-      </section>
-      <div class="character-grid">
-        <section class="panel avatar-panel">
-          <div class="avatar-frame"><img id="characterAvatar" src="icons/avatar-level-01.png" alt="Your current GoalRPG avatar"></div>
-          <div class="avatar-caption"><span>Current form</span><strong id="avatarCaptionTitle">Level 1 · Starting Out</strong></div>
-        </section>
-        <section class="panel character-stats">
-          <p class="eyebrow">Character sheet</p>
-          <div class="char-level"><span>Level</span><strong id="characterLevel">1</strong></div>
-          <div class="char-xp"><span id="characterXp">0 / 50 XP</span><div class="progress"><i id="characterXpProgress"></i></div></div>
-          <div class="title-box"><span>Title</span><strong id="characterTitleName">Foundation</strong></div>
-          <h2>Attributes</h2>
-          <div class="attribute"><span>Activity</span><div><i id="activityAttribute"></i></div><b id="activityValue">0</b></div>
-          <div class="attribute"><span>Recovery</span><div><i id="recoveryAttribute"></i></div><b id="recoveryValue">0</b></div>
-          <div class="attribute"><span>Tracking</span><div><i id="trackingAttribute"></i></div><b id="trackingValue">0</b></div>
-          <div class="attribute"><span>Consistency</span><div><i id="consistencyAttribute"></i></div><b id="consistencyValue">0</b></div>
-        </section>
-      </div>
-      <section class="panel unlock-panel">
-        <div class="section-head"><div><p class="eyebrow">Progression path</p><h2>Avatar milestones</h2></div><span class="screen-badge">VISUAL REWARDS</span></div>
-        <div class="milestone-list">
-          <div class="milestone unlocked"><span>1</span><div><strong>Starting Out</strong><small>Current avatar</small></div></div>
-          <div class="milestone"><span>3</span><div><strong>Next evolution</strong><small>Unlock at level 3</small></div></div>
-          <div class="milestone"><span>5</span><div><strong>Locked stage</strong><small>Unlock at level 5</small></div></div>
-          <div class="milestone"><span>8</span><div><strong>Locked stage</strong><small>Unlock at level 8</small></div></div>
-        </div>
-        <p class="unlock-note">Future stages will upgrade this same character’s physique, gear and beach environment.</p>
-      </section>
+    <section id="campaign" class="view" aria-labelledby="campaignTitle">
+      <div class="page-heading"><p class="kicker">Campaign control</p><h1 id="campaignTitle">Campaign</h1></div>
+      <form id="campaignForm" class="pixel-panel campaign-form">
+        <label>Campaign name<input id="campaignNameInput" maxlength="60" required></label>
+        <div class="form-row"><label>Starting weight (kg)<input id="startingWeightInput" type="number" min="20" max="500" step="0.1"></label><label>Target weight (kg)<input id="targetWeightInput" type="number" min="20" max="500" step="0.1"></label></div>
+        <button class="pixel-button" type="submit">Save campaign</button>
+        <p>This campaign is completed manually when you decide the objective has been reached.</p>
+      </form>
     </section>
+
     <section id="settings" class="view" aria-labelledby="settingsTitle">
-      <p class="eyebrow">Local control</p><h1 id="settingsTitle">Data & backup</h1>
-      <section class="panel settings-panel">
-        <div><h2>Your data stays here</h2><p>Entries are stored in this browser. Export a backup before changing devices or clearing browser data.</p></div>
-        <div class="settings-actions">
-          <button id="exportButton" class="accent" type="button">Export GoalRPG backup</button>
-          <label class="ghost file-button">Restore backup<input id="importInput" type="file" accept="application/json,.json"></label>
-        </div>
-        <p id="storageStatus" class="status" role="status"></p>
-      </section>
+      <div class="page-heading"><p class="kicker">Local control</p><h1 id="settingsTitle">Data</h1></div>
+      <section class="pixel-panel data-panel"><div><h2>Your data stays here</h2><p>Export a backup before changing devices or clearing browser data.</p></div><div class="data-actions"><button id="exportButton" class="pixel-button" type="button">Export backup</button><label class="pixel-button secondary file-button">Restore backup<input id="importInput" type="file" accept="application/json,.json"></label></div><p id="storageStatus" role="status"></p></section>
     </section>
   </main>
 
   <nav class="bottom-nav" aria-label="Primary navigation">
-    <a href="#today" class="active"><span>T</span><b>Today</b></a>
-    <a href="#nutrition"><span>N</span><b>Nutrition</b></a>
-    <a href="#training"><span>X</span><b>Training</b></a>
-    <a href="#progress"><span>P</span><b>Progress</b></a>
-    <a href="#character"><span>C</span><b>Character</b></a>
+    <a href="#today" class="active"><span>✓</span><b>Today</b></a>
+    <a href="#statistics"><span>▥</span><b>Stats</b></a>
+    <a href="#achievements"><span>★</span><b>Awards</b></a>
+    <a href="#campaign"><span>◆</span><b>Campaign</b></a>
+    <a href="#settings"><span>⚙</span><b>Data</b></a>
   </nav>
 
-  <dialog id="questDialog">
-    <form id="questForm" method="dialog">
-      <div class="dialog-head"><div><p class="eyebrow">Create your own</p><h2>New quest</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div>
-      <label>Quest name<input id="questName" required maxlength="80" autocomplete="off" placeholder="What will you complete?"></label>
-      <label>XP reward<select id="questXp"><option value="10">10 XP · Light</option><option value="20" selected>20 XP · Standard</option><option value="30">30 XP · Stretch</option></select></label>
-      <button class="accent full" value="default" type="submit">Add to today</button>
-    </form>
-  </dialog>
+  <dialog id="questDialog"><form id="questForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Protocol editor</p><h2>New quest</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label>Quest name<input id="questName" required maxlength="80" autocomplete="off"></label><label>XP reward<select id="questXp"><option value="10">10 XP</option><option value="20">20 XP</option><option value="40" selected>40 XP</option><option value="50">50 XP</option><option value="60">60 XP</option><option value="100">100 XP</option></select></label><button class="pixel-button full" value="default" type="submit">Add quest</button></form></dialog>
+  <dialog id="metricDialog"><form id="metricForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Quick log</p><h2 id="metricTitle">Log metric</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label><span id="metricLabel">Value</span><input id="metricInput" required type="number" inputmode="decimal"></label><button class="pixel-button full" value="default" type="submit">Save</button></form></dialog>
 
-  <dialog id="metricDialog">
-    <form id="metricForm" method="dialog">
-      <div class="dialog-head"><div><p class="eyebrow">Today</p><h2 id="metricTitle">Log metric</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div>
-      <label><span id="metricLabel">Value</span><input id="metricInput" required type="number" inputmode="decimal"></label>
-      <button class="accent full" value="default" type="submit">Save entry</button>
-    </form>
-  </dialog>
-
+  <div id="xpBurst" class="xp-burst" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=14" defer></script>
+  <div id="levelUpOverlay" class="level-up-overlay" hidden><div><p>LEVEL UP</p><strong id="levelUpNumber">2</strong><button id="dismissLevelUp" class="pixel-button" type="button">Continue</button></div></div>
+  <script src="app.js?v=20" defer></script>
 </body>
 </html>
