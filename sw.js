@@ -1,5 +1,5 @@
-const CACHE = 'goalrpg-shell-v9';
-const SHELL = ['./', './index.html', './styles.css?v=9', './app.js?v=9', './manifest.webmanifest?v=9', './icons/goalrpg.png', './icons/avatar-stage-1.png'];
+const CACHE = 'goalrpg-shell-v11';
+const SHELL = ['./', './index.html', './styles.css?v=11', './app.js?v=11', './manifest.webmanifest?v=11', './icons/goalrpg.png', './icons/avatar-stage-1.png'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {

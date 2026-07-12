@@ -20,3 +20,9 @@ main{max-width:1180px}#today .hero{position:relative;display:grid;grid-template-
 @media(max-width:370px){#today .hero-copy,#today .level-card,#today .quests-panel{width:66%}#today .hero-copy h1{font-size:30px}#today .quests-panel h2{font-size:18px}.bottom-nav a b{font-size:8.5px}}
 /* v8 character framing polish */
 @media(max-width:700px){#today .hero-art img{object-position:50% center}}
+
+/* v10: keep the avatar visible beside the quest board */
+@media(min-width:701px){#today .hero-art img{width:125%;max-width:none;transform:translateX(-18%);object-fit:cover}#today .hero-copy,#today .level-card,#today .quests-panel{width:55%}#today .hero-copy h1{font-size:48px;white-space:nowrap;letter-spacing:-3px}#today .hero-copy{padding-top:10px}#today .quests-panel{width:55%}}
+@media(max-width:700px){#today .hero-art img{width:125%;max-width:none;transform:translateX(-28%);object-fit:cover;object-position:center center}#today .hero-copy h1{white-space:normal}}
+/* v11 final desktop character clearance */
+@media(min-width:701px){#today .hero-art img{transform:translateX(-22%)}}
