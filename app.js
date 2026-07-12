@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'ova-data-v1';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const PERFECT_DAY_XP = 250;
 const METRICS = {
   weight: { title: 'Log weight', label: 'Weight (kg)', min: 20, max: 500, step: .1 },
@@ -7,41 +7,35 @@ const METRICS = {
   water: { title: 'Log water', label: 'Water (litres)', min: 0, max: 20, step: .1 },
   sleep: { title: 'Log sleep', label: 'Sleep (hours)', min: 0, max: 24, step: .1 }
 };
-const PROTOCOL = [
-  ['Morning Weight', 10], ['Gym', 100], ['Meal A', 40], ['Meal B', 50],
-  ['Meal C', 50], ['Meal D', 60], ['Water Goal', 40], ['Foam Roll', 20],
-  ['Creatine', 10], ['Fish Oil', 10], ['Vitamin D', 10], ['Magnesium', 10]
-];
 const TITLES = ['Initiate','Apprentice','Adept','Disciplined','Vanguard','Guardian','Champion','Warden','Hero','Legend'];
 const ACHIEVEMENT_REWARDS = {'first-step':10,'protocol-perfect':50,'three-day-flame':100,'meal-initiate':10,'meal-veteran':250,'xp-collector':100};
-const emptyData = () => ({ schemaVersion: SCHEMA_VERSION, createdAt: new Date().toISOString(), campaign: { name: 'Visible Abs', startingWeight: null, targetWeight: null }, days: {}, protocolVersion: 0 });
+const emptyData = () => ({ schemaVersion: SCHEMA_VERSION, createdAt: new Date().toISOString(), campaign: { name: 'Visible Abs', startingWeight: null, targetWeight: null }, targets: { steps: null, water: null, sleep: null }, questTemplates: [], days: {} });
 let data = loadData();
 let selectedMetric = null;
 let installPrompt = null;
-const todayKey = localDateKey();
+let todayKey = localDateKey();
 ensureDataShape();
 if(data.campaign.name==='Operation Visible Abs'){data.campaign.name='Visible Abs';persist();}
-seedProtocol();
+ensureToday();
 
 function localDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 function dateFromKey(key) { return new Date(`${key}T12:00:00`); }
-function getDay(key = todayKey) { if (!data.days[key]) data.days[key] = { quests: [], metrics: {}, dayType: null, note: '' }; return data.days[key]; }
+function getDay(key = todayKey) { if (!data.days[key]) { const weekday=dateFromKey(key).getDay(); data.days[key]={ quests:(data.questTemplates||[]).filter(q=>q.recurrence==='daily'||q.days?.includes(weekday)).map(q=>({id:q.id,name:q.name,xp:q.xp,completed:false,metric:q.metric||'',recurring:true})), metrics:{}, dayType:null, note:'' }; persist(); } return data.days[key]; }
 function loadData() { try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY)); return parsed?.days ? parsed : emptyData(); } catch { return emptyData(); } }
 function ensureDataShape() {
   data.schemaVersion = SCHEMA_VERSION;
   data.campaign ||= { name: 'Visible Abs', startingWeight: null, targetWeight: null };
   data.campaign.name ||= 'Visible Abs';
+  data.targets ||= { steps: null, water: null, sleep: null };
+  data.questTemplates ||= [];
   data.unlockedAchievements ||= [];
   Object.values(data.days).forEach(day => { day.quests ||= []; day.metrics ||= {}; });
+  if(!data.questTemplates.length){const latest=Object.entries(data.days).sort(([a],[b])=>b.localeCompare(a))[0]?.[1];if(latest?.quests?.length)data.questTemplates=latest.quests.map(q=>({id:q.id,name:q.name,xp:Number(q.xp)||10,metric:inferMetric(q.name),recurrence:'daily'}));}
+  persist();
 }
-function seedProtocol() {
-  if (data.protocolVersion >= 2) return;
-  const day = getDay();
-  const temporaryIds = new Set(['starter-weight','starter-steps','starter-water','starter-sleep','starter-training']);
-  const containsOnlyTemporary = day.quests.length && day.quests.every(q => temporaryIds.has(q.id));
-  if (!day.quests.length || containsOnlyTemporary) day.quests = PROTOCOL.map(([name,xp], index) => ({ id:`protocol-${index}`, name, xp, completed:false }));
-  data.protocolVersion = 2; persist();
-}
+function inferMetric(name=''){const value=name.toLowerCase();if(value.includes('weight'))return 'weight';if(value.includes('step'))return 'steps';if(value.includes('water'))return 'water';if(value.includes('sleep'))return 'sleep';if(value.includes('workout')||value.includes('gym')||value.includes('rest'))return 'training';return '';}
+function ensureToday(){getDay();}
+function refreshToday(){const current=localDateKey();if(current===todayKey)return;todayKey=current;ensureToday();renderAll();toast('A new quest day has begun');}
 function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 function saveData() { persist(); renderAll(); }
 function isPerfect(day) { return Boolean(day?.quests?.length) && day.quests.every(q => q.completed); }
@@ -87,8 +81,8 @@ function renderToday(){
   document.querySelector('#xpLabel').textContent=`${xp-info.start} / ${info.end-info.start} XP`; document.querySelector('#xpProgress').style.width=`${info.progress}%`; document.querySelector('#headerXpBar').style.width=`${info.progress}%`;
   document.querySelector('#currentWeight').textContent=weight===null?'—':weight.toFixed(1); document.querySelector('#targetWeight').textContent=data.campaign.targetWeight??'—'; document.querySelector('#currentStreak').textContent=streak.current; document.querySelector('#campaignPercent').textContent=`${Math.round(progress)}%`; document.querySelector('#campaignProgress').style.width=`${progress}%`;
   document.querySelector('#questCounter').textContent=`${complete} / ${total} complete`; document.querySelector('#questBoardProgress').style.width=total?`${complete/total*100}%`:'0%'; document.querySelector('#perfectDayBonus').classList.toggle('earned',perfect);
-  const list=document.querySelector('#questList'); list.innerHTML=day.quests.map(q=>`<div class="quest ${q.completed?'completed':''}"><input class="quest-check" type="checkbox" data-quest-id="${q.id}" ${q.completed?'checked':''} aria-label="Complete ${safeText(q.name)}"><span class="quest-title">${safeText(q.name)}</span><span class="quest-xp">+${q.xp} XP</span><button class="delete-quest" data-delete-quest="${q.id}" aria-label="Delete ${safeText(q.name)}">×</button></div>`).join(''); document.querySelector('#emptyQuests').hidden=Boolean(total);
-  for(const metric of Object.keys(METRICS)){ const value=day.metrics?.[metric]; document.querySelector(`#${metric}Value`).textContent=value===undefined?'—':Number(value).toLocaleString(undefined,{maximumFractionDigits:1}); }
+  const list=document.querySelector('#questList'); list.innerHTML=day.quests.map(q=>`<div class="quest ${q.completed?'completed':''}"><input class="quest-check" type="checkbox" data-quest-id="${q.id}" ${q.completed?'checked':''} aria-label="Complete ${safeText(q.name)}"><button type="button" class="quest-title edit-quest">${safeText(q.name)}</button><span class="quest-xp">+${q.xp} XP</span><button class="delete-quest" data-delete-quest="${q.id}" aria-label="Delete ${safeText(q.name)}">×</button></div>`).join(''); document.querySelector('#emptyQuests').hidden=Boolean(total);
+  for(const metric of Object.keys(METRICS)){const value=day.metrics?.[metric],target=data.targets?.[metric],label=value===undefined?'—':Number(value).toLocaleString(undefined,{maximumFractionDigits:1})+(target?' / '+target:'');document.getElementById(metric+'Value').textContent=label;}document.querySelector('#trainingValue').textContent=day.dayType?day.dayType[0].toUpperCase()+day.dayType.slice(1):'Choose'
 }
 function renderStatistics(){
   const xp=lifetimeXp(),info=levelInfo(xp),perfect=perfectDayCount(),streak=streakStats(),gym=Object.values(data.days).reduce((n,d)=>n+d.quests.filter(q=>q.completed&&q.name.toLowerCase()==='gym').length,0),meals=Object.values(data.days).reduce((n,d)=>n+d.quests.filter(q=>q.completed&&/^meal\s/i.test(q.name)).length,0),start=Number(data.campaign.startingWeight),current=latestWeight(),lost=start&&current!==null?Math.max(0,start-current):0;
@@ -103,17 +97,22 @@ function achievements(){ const xp=lifetimeXp(),perfect=perfectDayCount(),quests=
   ['first-step','First Step','Complete your first quest',quests>=1,10],['protocol-perfect','Protocol Perfect','Complete one perfect day',perfect>=1,50],['three-day-flame','Three Day Flame','Reach a 3-day streak',streakStats().longest>=3,100],['meal-initiate','Meal Initiate','Complete your first meal',meals>=1,10],['meal-veteran','Meal Veteran','Complete 50 meals',meals>=50,250],['xp-collector','XP Collector','Earn 1,000 lifetime XP',xp>=1000,100]
 ]; }
 function renderAchievements(){ document.querySelector('#achievementList').innerHTML=achievements().map(([id,name,desc,done,reward])=>`<article class="pixel-panel achievement ${done?'':'locked'}"><span class="achievement-icon">${done?'★':'?'}</span><div><strong>${name}</strong><small>${desc}</small></div><em>+${reward} XP</em></article>`).join(''); }
-function checkNewAchievements(){ const award=achievements().find(([id,,,done])=>done&&!data.unlockedAchievements.includes(id)); if(!award)return; const [id,name,,done,reward]=award,before=levelInfo(lifetimeXp()).level; data.unlockedAchievements.push(id); persist(); renderAll(); showAchievement(name,reward); const after=levelInfo(lifetimeXp()).level; if(after>before)setTimeout(()=>showLevelUp(after),1700); }function renderCampaign(){ document.querySelector('#campaignNameInput').value=data.campaign.name; document.querySelector('#startingWeightInput').value=data.campaign.startingWeight??''; document.querySelector('#targetWeightInput').value=data.campaign.targetWeight??''; }
+function checkNewAchievements(){ const award=achievements().find(([id,,,done])=>done&&!data.unlockedAchievements.includes(id)); if(!award)return; const [id,name,,done,reward]=award,before=levelInfo(lifetimeXp()).level; data.unlockedAchievements.push(id); persist(); renderAll(); showAchievement(name,reward); const after=levelInfo(lifetimeXp()).level; if(after>before)setTimeout(()=>showLevelUp(after),1700); }function renderCampaign(){document.querySelector('#campaignNameInput').value=data.campaign.name;document.querySelector('#startingWeightInput').value=data.campaign.startingWeight??'';document.querySelector('#targetWeightInput').value=data.campaign.targetWeight??'';for(const metric of ['steps','water','sleep'])document.getElementById(metric+'TargetInput').value=data.targets?.[metric]??'';}
 
 function showRoute(){ const route=location.hash.slice(1)||'today'; document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===route)); document.querySelectorAll('.bottom-nav a').forEach(a=>a.classList.toggle('active',a.hash===`#${route}`)); window.scrollTo({top:0}); }
 addEventListener('hashchange',showRoute); showRoute();
 document.querySelector('#questList').addEventListener('change',e=>{ const id=e.target.dataset.questId;if(!id)return; const q=getDay().quests.find(x=>x.id===id);if(!q)return; const before=levelInfo(lifetimeXp()).level,wasPerfect=isPerfect(getDay()); q.completed=e.target.checked; persist(); const afterXp=lifetimeXp(),after=levelInfo(afterXp).level; renderAll(); if(q.completed){showXp(q.xp); setTimeout(checkNewAchievements,550); if(!wasPerfect&&isPerfect(getDay())){setTimeout(()=>showXp(PERFECT_DAY_XP),350);toast('Perfect Day!');} if(after>before)setTimeout(()=>showLevelUp(after),900);}else{toast('Quest reopened');} });
-document.querySelector('#questList').addEventListener('click',e=>{const id=e.target.dataset.deleteQuest;if(!id)return;getDay().quests=getDay().quests.filter(q=>q.id!==id);saveData();toast('Quest removed');});
-document.querySelector('#addQuestButton').addEventListener('click',()=>{document.querySelector('#questForm').reset();document.querySelector('#questDialog').showModal();});
-document.querySelector('#questForm').addEventListener('submit',e=>{e.preventDefault();const name=document.querySelector('#questName').value.trim();if(!name)return;getDay().quests.push({id:crypto.randomUUID?.()||`${Date.now()}`,name,xp:Number(document.querySelector('#questXp').value),completed:false});saveData();document.querySelector('#questDialog').close();toast('Quest added');});
+function openQuestDialog(quest=null){document.querySelector('#questForm').reset();document.querySelector('#questId').value=quest?.id||'';document.querySelector('#questDialogTitle').textContent=quest?'Edit quest':'New quest';document.querySelector('#questName').value=quest?.name||'';document.querySelector('#questXp').value=quest?.xp||40;document.querySelector('#questMetric').value=quest?.metric||inferMetric(quest?.name);document.querySelector('#questRecurrence').value=quest?.recurring===false?'once':'daily';document.querySelector('#questDialog').showModal();}
+document.querySelector('#questList').addEventListener('click',e=>{const row=e.target.closest('.quest'),id=row?.querySelector('[data-quest-id]')?.dataset.questId;if(!id)return;if(e.target.closest('.delete-quest')){const q=getDay().quests.find(item=>item.id===id);getDay().quests=getDay().quests.filter(item=>item.id!==id);if(q?.recurring!==false)data.questTemplates=data.questTemplates.filter(item=>item.id!==id);saveData();toast('Quest removed');return;}if(e.target.closest('.edit-quest'))openQuestDialog(getDay().quests.find(item=>item.id===id));});
+document.querySelector('#addQuestButton').addEventListener('click',()=>openQuestDialog());
+document.querySelector('#questForm').addEventListener('submit',e=>{e.preventDefault();const id=document.querySelector('#questId').value,name=document.querySelector('#questName').value.trim(),xp=Number(document.querySelector('#questXp').value),metric=document.querySelector('#questMetric').value,recurrence=document.querySelector('#questRecurrence').value;if(!name||!Number.isFinite(xp))return;if(id){const quest=getDay().quests.find(q=>q.id===id);Object.assign(quest,{name,xp,metric,recurring:recurrence!=='once'});data.questTemplates=data.questTemplates.filter(q=>q.id!==id);if(recurrence==='daily')data.questTemplates.push({id,name,xp,metric,recurrence:'daily'});}else{const newId=crypto.randomUUID?.()||Date.now().toString();getDay().quests.push({id:newId,name,xp,metric,completed:false,recurring:recurrence!=='once'});if(recurrence==='daily')data.questTemplates.push({id:newId,name,xp,metric,recurrence:'daily'});}saveData();document.querySelector('#questDialog').close();toast('Quest saved');});
 document.querySelectorAll('[data-open-metric]').forEach(button=>button.addEventListener('click',()=>{selectedMetric=button.dataset.openMetric;const cfg=METRICS[selectedMetric],input=document.querySelector('#metricInput');document.querySelector('#metricTitle').textContent=cfg.title;document.querySelector('#metricLabel').textContent=cfg.label;input.min=cfg.min;input.max=cfg.max;input.step=cfg.step;input.value=getDay().metrics?.[selectedMetric]??'';document.querySelector('#metricDialog').showModal();}));
-document.querySelector('#metricForm').addEventListener('submit',e=>{e.preventDefault();const input=document.querySelector('#metricInput'),value=Number(input.value),cfg=METRICS[selectedMetric];if(!Number.isFinite(value)||value<cfg.min||value>cfg.max)return;getDay().metrics[selectedMetric]=value;if(selectedMetric==='weight'&&!data.campaign.startingWeight)data.campaign.startingWeight=value;saveData();document.querySelector('#metricDialog').close();showXp(5);toast('Log saved');});
-document.querySelector('#campaignForm').addEventListener('submit',e=>{e.preventDefault();data.campaign.name=document.querySelector('#campaignNameInput').value.trim()||'Visible Abs';data.campaign.startingWeight=Number(document.querySelector('#startingWeightInput').value)||null;data.campaign.targetWeight=Number(document.querySelector('#targetWeightInput').value)||null;saveData();toast('Campaign saved');});
+function completeLinkedQuests(metric){const day=getDay(),target=data.targets?.[metric],qualifies=metric==='weight'||metric==='training'||(target!==null&&target!==undefined&&Number(day.metrics[metric])>=Number(target)),completed=[];if(!qualifies)return completed;day.quests.filter(q=>!q.completed&&(q.metric===metric||(!q.metric&&inferMetric(q.name)===metric))).forEach(q=>{q.completed=true;completed.push(q);});return completed;}
+function celebrateLinked(completed,beforeLevel){if(!completed.length)return;showXp(completed.reduce((sum,q)=>sum+Number(q.xp||0),0));setTimeout(checkNewAchievements,550);const after=levelInfo(lifetimeXp()).level;if(after>beforeLevel)setTimeout(()=>showLevelUp(after),900);}
+document.querySelector('#metricForm').addEventListener('submit',e=>{e.preventDefault();const input=document.querySelector('#metricInput'),value=Number(input.value),cfg=METRICS[selectedMetric];if(!Number.isFinite(value)||value<cfg.min||value>cfg.max)return;const before=levelInfo(lifetimeXp()).level;getDay().metrics[selectedMetric]=value;if(selectedMetric==='weight'&&!data.campaign.startingWeight)data.campaign.startingWeight=value;const completed=completeLinkedQuests(selectedMetric);saveData();document.querySelector('#metricDialog').close();celebrateLinked(completed,before);toast(completed.length?'Log saved · quest complete':'Log saved');});
+document.querySelector('#campaignForm').addEventListener('submit',e=>{e.preventDefault();data.campaign.name=document.querySelector('#campaignNameInput').value.trim()||'Visible Abs';data.campaign.startingWeight=Number(document.querySelector('#startingWeightInput').value)||null;data.campaign.targetWeight=Number(document.querySelector('#targetWeightInput').value)||null;for(const metric of ['steps','water','sleep'])data.targets[metric]=Number(document.getElementById(metric+'TargetInput').value)||null;saveData();toast('Campaign and targets saved');});
+document.querySelector('#trainingLogButton').addEventListener('click',()=>document.querySelector('#trainingDialog').showModal());
+document.querySelector('#trainingForm').addEventListener('submit',e=>{e.preventDefault();const choice=e.submitter?.value;if(!['workout','rest'].includes(choice))return;const before=levelInfo(lifetimeXp()).level;getDay().dayType=choice;const completed=completeLinkedQuests('training');saveData();document.querySelector('#trainingDialog').close();celebrateLinked(completed,before);toast((choice==='workout'?'Workout':'Rest day')+' logged');});
 document.querySelector('#dismissLevelUp').addEventListener('click',()=>document.querySelector('#levelUpOverlay').hidden=true);
 document.querySelector('#dismissAchievement').addEventListener('click',()=>{document.querySelector('#achievementOverlay').hidden=true;setTimeout(checkNewAchievements,250);});
 document.querySelector('#exportButton').addEventListener('click',()=>{const payload={...data,exportedAt:new Date().toISOString(),app:'GoalRPG'};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`goalrpg-backup-${todayKey}.json`;a.click();URL.revokeObjectURL(url);toast('Backup exported');});
@@ -127,7 +126,8 @@ function previewReminder(){const el=document.querySelector('#notificationPreview
 document.querySelector('#previewNotificationButton').addEventListener('click',previewReminder);
 document.addEventListener('pointerdown',unlockAudio,{capture:true,once:true});
 document.addEventListener('touchstart',unlockAudio,{capture:true,once:true,passive:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&audioContext?.state==='suspended')audioContext.resume();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(audioContext?.state==='suspended')audioContext.resume();refreshToday();}});
+setInterval(refreshToday,60000);
 document.querySelector('#soundTestButton').addEventListener('click',()=>{if(playNotes([[523,0,.16],[659,.14,.16],[784,.28,.2],[1047,.46,.42]],'square',.12)){toast('Sound test playing');}else toast('Sound is unavailable');});
 setTimeout(previewReminder,900);
 setTimeout(checkNewAchievements,1900);

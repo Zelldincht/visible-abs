@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#bcecff">
   <meta name="description" content="GoalRPG is a retro campaign manager for completing your daily protocol.">
-  <link rel="manifest" href="manifest.webmanifest?v=26">
+  <link rel="manifest" href="manifest.webmanifest?v=27">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=26">
+  <link rel="stylesheet" href="styles.css?v=27">
   <title>GoalRPG</title>
 </head>
 <body>
@@ -46,6 +46,7 @@
         <button type="button" data-open-metric="steps"><span>Steps</span><strong id="stepsValue">—</strong></button>
         <button type="button" data-open-metric="water"><span>Water</span><strong id="waterValue">—</strong></button>
         <button type="button" data-open-metric="sleep"><span>Sleep</span><strong id="sleepValue">—</strong></button>
+        <button type="button" id="trainingLogButton"><span>Training</span><strong id="trainingValue">Choose</strong></button>
       </section>
     </section>
 
@@ -70,7 +71,7 @@
       <div class="page-heading"><p class="kicker">Campaign control</p><h1 id="campaignTitle">Campaign</h1></div>
       <form id="campaignForm" class="pixel-panel campaign-form">
         <label>Campaign name<input id="campaignNameInput" maxlength="60" required></label>
-        <div class="form-row"><label>Starting weight (kg)<input id="startingWeightInput" type="number" min="20" max="500" step="0.1"></label><label>Target weight (kg)<input id="targetWeightInput" type="number" min="20" max="500" step="0.1"></label></div>
+        <div class="form-row"><label>Starting weight (kg)<input id="startingWeightInput" type="number" min="20" max="500" step="0.1"></label><label>Target weight (kg)<input id="targetWeightInput" type="number" min="20" max="500" step="0.1"></label></div><h2 class="form-subheading">Daily targets</h2><div class="target-grid"><label>Steps<input id="stepsTargetInput" type="number" min="0" max="200000" step="1" inputmode="numeric"></label><label>Water (litres)<input id="waterTargetInput" type="number" min="0" max="20" step="0.1" inputmode="decimal"></label><label>Sleep (hours)<input id="sleepTargetInput" type="number" min="0" max="24" step="0.1" inputmode="decimal"></label></div>
         <button class="pixel-button" type="submit">Save campaign</button>
         <p>This campaign is completed manually when you decide the objective has been reached.</p>
       </form>
@@ -90,14 +91,16 @@
     <a href="#settings"><span>⚙</span><b>Data</b></a>
   </nav>
 
-  <dialog id="questDialog"><form id="questForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Protocol editor</p><h2>New quest</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label>Quest name<input id="questName" required maxlength="80" autocomplete="off"></label><label>XP reward<select id="questXp"><option value="10">10 XP</option><option value="20">20 XP</option><option value="40" selected>40 XP</option><option value="50">50 XP</option><option value="60">60 XP</option><option value="100">100 XP</option></select></label><button class="pixel-button full" value="default" type="submit">Add quest</button></form></dialog>
+  <dialog id="questDialog"><form id="questForm" method="dialog"><input id="questId" type="hidden"><div class="dialog-head"><div><p class="kicker">Quest editor</p><h2 id="questDialogTitle">New quest</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label>Quest name<input id="questName" required maxlength="80" autocomplete="off"></label><div class="form-row"><label>XP reward<input id="questXp" type="number" min="1" max="1000" step="1" value="40" inputmode="numeric"></label><label>Appears<select id="questRecurrence"><option value="daily">Every day</option><option value="once">Today only</option></select></label></div><label>Linked log<select id="questMetric"><option value="">None</option><option value="weight">Weight</option><option value="steps">Steps target</option><option value="water">Water target</option><option value="sleep">Sleep target</option><option value="training">Workout/rest choice</option></select></label><button class="pixel-button full" value="default" type="submit">Save quest</button></form></dialog>
   <dialog id="metricDialog"><form id="metricForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Quick log</p><h2 id="metricTitle">Log metric</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label><span id="metricLabel">Value</span><input id="metricInput" required type="number" inputmode="decimal"></label><button class="pixel-button full" value="default" type="submit">Save</button></form></dialog>
+
+  <dialog id="trainingDialog"><form id="trainingForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Daily log</p><h2>Workout or rest?</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><div class="choice-grid"><button class="pixel-button" type="submit" name="training" value="workout">Workout</button><button class="pixel-button secondary" type="submit" name="training" value="rest">Rest</button></div></form></dialog>
 
   <div id="xpBurst" class="xp-burst" aria-hidden="true"></div>
   <aside id="notificationPreview" class="notification-preview" role="status" aria-live="polite"><img src="icons/goalrpg.png" alt=""><div><span>GOALRPG <small>now</small></span><strong>Reminder</strong><p>Gym</p></div></aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="achievementOverlay" class="achievement-overlay" hidden><div><span class="award-star">★</span><p>ACHIEVEMENT UNLOCKED</p><strong id="achievementUnlockName">First Step</strong><em id="achievementUnlockReward">+10 XP</em><button id="dismissAchievement" class="pixel-button" type="button">Claim Award</button></div></div>
   <div id="levelUpOverlay" class="level-up-overlay" hidden><div><p>LEVEL UP</p><strong id="levelUpNumber">2</strong><button id="dismissLevelUp" class="pixel-button" type="button">Continue</button></div></div>
-  <script src="app.js?v=26" defer></script>
+  <script src="app.js?v=27" defer></script>
 </body>
 </html>
