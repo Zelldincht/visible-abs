@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15131d">
   <meta name="description" content="A private, offline-first daily consistency tracker.">
-  <link rel="manifest" href="manifest.webmanifest?v=4">
+  <link rel="manifest" href="manifest.webmanifest?v=5">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <title>GoalRPG</title>
 </head>
 <body>
@@ -23,7 +23,7 @@
   <main>
     <section id="today" class="view active" aria-labelledby="todayTitle">
       <div class="hero">
-        <div class="hero-art" aria-hidden="true"><img src="icons/goalrpg.png" alt=""><span>DAILY ADVENTURE</span></div>
+        <div class="hero-art" aria-hidden="true"><img src="icons/avatar-stage-1.png" alt=""><span>STAGE 1 · STARTING OUT</span></div>
         <div>
           <p id="todayDate" class="eyebrow"></p>
           <h1 id="todayTitle">Today</h1>
@@ -83,6 +83,23 @@
       </section>
     </section>
 
+    <section id="nutrition" class="view" aria-labelledby="nutritionTitle">
+      <div class="page-title"><div><p class="eyebrow">Fuel log</p><h1 id="nutritionTitle">Nutrition</h1></div><span class="screen-badge">PLAYER DEFINED</span></div>
+      <section class="panel empty-feature">
+        <div class="feature-pixel">N</div>
+        <div><h2>No nutrition plan defined</h2><p>Your targets and meals will appear here only after you add them. GoalRPG will not create meals or meal times for you.</p></div>
+        <span class="coming-tag">NEXT BUILD</span>
+      </section>
+    </section>
+
+    <section id="training" class="view" aria-labelledby="trainingTitle">
+      <div class="page-title"><div><p class="eyebrow">Training log</p><h1 id="trainingTitle">Training</h1></div><span class="screen-badge">PLAYER DEFINED</span></div>
+      <section class="panel empty-feature">
+        <div class="feature-pixel">T</div>
+        <div><h2>No training plan defined</h2><p>Your own exercises and sessions will live here when you create them. GoalRPG will not prescribe exercises or a workout schedule.</p></div>
+        <span class="coming-tag">NEXT BUILD</span>
+      </section>
+    </section>
     <section id="progress" class="view" aria-labelledby="progressTitle">
       <p class="eyebrow">Your record</p><h1 id="progressTitle">Progress</h1>
       <div class="summary-grid">
@@ -93,6 +110,36 @@
       <section class="panel history-panel"><div class="section-head"><div><p class="eyebrow">Recent entries</p><h2>History</h2></div></div><div id="historyList"></div></section>
     </section>
 
+    <section id="character" class="view" aria-labelledby="characterTitle">
+      <div class="page-title"><div><p class="eyebrow">Your journey</p><h1 id="characterTitle">Character</h1></div><a class="ghost settings-link" href="#settings">Data & settings</a></div>
+      <div class="character-grid">
+        <section class="panel avatar-panel">
+          <div class="avatar-frame"><img src="icons/avatar-stage-1.png" alt="Your current GoalRPG avatar at the starting stage"></div>
+          <div class="avatar-caption"><span>Current form</span><strong>Stage 1 · Starting Out</strong></div>
+        </section>
+        <section class="panel character-stats">
+          <p class="eyebrow">Character sheet</p>
+          <div class="char-level"><span>Level</span><strong id="characterLevel">1</strong></div>
+          <div class="char-xp"><span id="characterXp">0 / 50 XP</span><div class="progress"><i id="characterXpProgress"></i></div></div>
+          <div class="title-box"><span>Title</span><strong id="characterTitleName">Foundation</strong></div>
+          <h2>Attributes</h2>
+          <div class="attribute"><span>Activity</span><div><i id="activityAttribute"></i></div><b id="activityValue">0</b></div>
+          <div class="attribute"><span>Recovery</span><div><i id="recoveryAttribute"></i></div><b id="recoveryValue">0</b></div>
+          <div class="attribute"><span>Tracking</span><div><i id="trackingAttribute"></i></div><b id="trackingValue">0</b></div>
+          <div class="attribute"><span>Consistency</span><div><i id="consistencyAttribute"></i></div><b id="consistencyValue">0</b></div>
+        </section>
+      </div>
+      <section class="panel unlock-panel">
+        <div class="section-head"><div><p class="eyebrow">Progression path</p><h2>Avatar milestones</h2></div><span class="screen-badge">VISUAL REWARDS</span></div>
+        <div class="milestone-list">
+          <div class="milestone unlocked"><span>1</span><div><strong>Starting Out</strong><small>Current avatar</small></div></div>
+          <div class="milestone"><span>3</span><div><strong>Next evolution</strong><small>Unlock at level 3</small></div></div>
+          <div class="milestone"><span>5</span><div><strong>Locked stage</strong><small>Unlock at level 5</small></div></div>
+          <div class="milestone"><span>8</span><div><strong>Locked stage</strong><small>Unlock at level 8</small></div></div>
+        </div>
+        <p class="unlock-note">Future stages will upgrade this same character’s physique, gear and beach environment.</p>
+      </section>
+    </section>
     <section id="settings" class="view" aria-labelledby="settingsTitle">
       <p class="eyebrow">Local control</p><h1 id="settingsTitle">Data & backup</h1>
       <section class="panel settings-panel">
@@ -107,9 +154,11 @@
   </main>
 
   <nav class="bottom-nav" aria-label="Primary navigation">
-    <a href="#today" class="active"><span>●</span>Today</a>
-    <a href="#progress"><span>↗</span>Progress</a>
-    <a href="#settings"><span>⚙</span>Data</a>
+    <a href="#today" class="active"><span>◆</span>Today</a>
+    <a href="#nutrition"><span>▥</span>Nutrition</a>
+    <a href="#training"><span>H</span>Training</a>
+    <a href="#progress"><span>▥</span>Progress</a>
+    <a href="#character"><span>♙</span>Character</a>
   </nav>
 
   <dialog id="questDialog">
@@ -130,6 +179,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=4" defer></script>
+  <script src="app.js?v=5" defer></script>
 </body>
 </html>

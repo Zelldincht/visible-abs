@@ -74,6 +74,21 @@ function renderProgress() {
   document.querySelector('#lifetimeXp').textContent = lifetimeXp().toLocaleString();
   document.querySelector('#questsComplete').textContent = Object.values(data.days).reduce((n,d) => n + (d.quests || []).filter(q=>q.completed).length, 0);
   document.querySelector('#daysLogged').textContent = days.length;
+  const characterInfo = levelInfo(lifetimeXp());
+  document.querySelector('#characterLevel').textContent = characterInfo.level;
+  document.querySelector('#characterXp').textContent = `${lifetimeXp() - characterInfo.start} / ${characterInfo.end - characterInfo.start} XP`;
+  document.querySelector('#characterXpProgress').style.width = `${characterInfo.progress}%`;
+  document.querySelector('#characterTitleName').textContent = characterInfo.name;
+  const characterAttributes = {
+    activity: Math.min(100, Object.values(data.days).filter(d => d.dayType === 'workout').length * 10 + Object.values(data.days).filter(d => d.metrics?.steps !== undefined).length * 5),
+    recovery: Math.min(100, Object.values(data.days).filter(d => d.dayType === 'rest').length * 10 + Object.values(data.days).filter(d => d.metrics?.sleep !== undefined).length * 5),
+    tracking: Math.min(100, Object.values(data.days).reduce((n, d) => n + Object.keys(d.metrics || {}).length * 2, 0)),
+    consistency: Math.min(100, days.length * 5)
+  };
+  Object.entries(characterAttributes).forEach(([name, value]) => {
+    document.querySelector(`#${name}Value`).textContent = value;
+    document.querySelector(`#${name}Attribute`).style.width = `${value}%`;
+  });
   document.querySelector('#historyList').innerHTML = days.length ? days.slice(0,30).map(([key,d]) => {
     const complete = (d.quests || []).filter(q=>q.completed).length;
     const total = (d.quests || []).length;
