@@ -61,6 +61,7 @@ function renderToday() {
   const list = document.querySelector('#questList');
   list.innerHTML = (day.quests || []).map(q => `<div class="quest ${q.completed ? 'completed' : ''}"><input class="quest-check" type="checkbox" data-quest-id="${q.id}" ${q.completed ? 'checked' : ''} aria-label="Complete ${safeText(q.name)}"><span class="quest-title">${safeText(q.name)}</span><span class="quest-xp">+${q.xp} XP</span><button class="delete-quest" data-delete-quest="${q.id}" aria-label="Delete ${safeText(q.name)}">×</button></div>`).join('');
   document.querySelector('#emptyQuests').hidden = Boolean(day.quests?.length);
+  document.querySelector('#questCounter').textContent = (day.quests || []).filter(q => q.completed).length + ' / ' + (day.quests || []).length + ' COMPLETE';
   for (const metric of Object.keys(METRICS)) {
     const value = day.metrics?.[metric];
     document.querySelector(`#${metric}Value`).textContent = value === undefined ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#15131d">
   <meta name="description" content="A private, offline-first daily consistency tracker.">
-  <link rel="manifest" href="manifest.webmanifest?v=5">
+  <link rel="manifest" href="manifest.webmanifest?v=7">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=7">
   <title>GoalRPG</title>
 </head>
 <body>
@@ -24,10 +24,10 @@
     <section id="today" class="view active" aria-labelledby="todayTitle">
       <div class="hero">
         <div class="hero-art" aria-hidden="true"><img src="icons/avatar-stage-1.png" alt=""><span>STAGE 1 · STARTING OUT</span></div>
-        <div>
+        <div class="hero-copy">
           <p id="todayDate" class="eyebrow"></p>
-          <h1 id="todayTitle">Today</h1>
-          <p class="lede">The plan is yours. This is just the scoreboard.</p>
+          <h1 id="todayTitle">Today's Orders</h1>
+          <p class="lede">Your character. Your objectives. Your progress.</p>
         </div>
         <div class="level-card" aria-label="Current level and XP">
           <div class="level-orbit"><strong id="levelNumber">1</strong><span>Level</span></div>
@@ -37,16 +37,16 @@
             <div class="progress"><i id="xpProgress"></i></div>
           </div>
         </div>
-      </div>
 
       <section class="panel quests-panel">
         <div class="section-head">
-          <div><p class="eyebrow">Daily focus</p><h2>Quests</h2></div>
+          <div><p class="eyebrow">Daily quest board</p><h2>Today's goals</h2><span id="questCounter" class="quest-counter">0 / 0 COMPLETE</span></div>
           <button id="addQuestButton" class="accent" type="button">+ New quest</button>
         </div>
         <div id="questList" class="quest-list"></div>
         <p id="emptyQuests" class="empty">No quests yet. Add only what you actually intend to do.</p>
       </section>
+      </div>
 
       <section class="metrics-grid" aria-label="Daily health logs">
         <article class="panel metric-card" data-metric="weight">
@@ -154,11 +154,11 @@
   </main>
 
   <nav class="bottom-nav" aria-label="Primary navigation">
-    <a href="#today" class="active"><span>◆</span>Today</a>
-    <a href="#nutrition"><span>▥</span>Nutrition</a>
-    <a href="#training"><span>H</span>Training</a>
-    <a href="#progress"><span>▥</span>Progress</a>
-    <a href="#character"><span>♙</span>Character</a>
+    <a href="#today" class="active"><span>T</span><b>Today</b></a>
+    <a href="#nutrition"><span>N</span><b>Nutrition</b></a>
+    <a href="#training"><span>X</span><b>Training</b></a>
+    <a href="#progress"><span>P</span><b>Progress</b></a>
+    <a href="#character"><span>C</span><b>Character</b></a>
   </nav>
 
   <dialog id="questDialog">
@@ -179,6 +179,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=5" defer></script>
+  <script src="app.js?v=7" defer></script>
 </body>
 </html>
