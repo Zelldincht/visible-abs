@@ -13,12 +13,13 @@ const PROTOCOL = [
   ['Creatine', 10], ['Fish Oil', 10], ['Vitamin D', 10], ['Magnesium', 10]
 ];
 const TITLES = ['Initiate','Apprentice','Adept','Disciplined','Vanguard','Guardian','Champion','Warden','Hero','Legend'];
-const emptyData = () => ({ schemaVersion: SCHEMA_VERSION, createdAt: new Date().toISOString(), campaign: { name: 'Operation Visible Abs', startingWeight: null, targetWeight: null }, days: {}, protocolVersion: 0 });
+const emptyData = () => ({ schemaVersion: SCHEMA_VERSION, createdAt: new Date().toISOString(), campaign: { name: 'Visible Abs', startingWeight: null, targetWeight: null }, days: {}, protocolVersion: 0 });
 let data = loadData();
 let selectedMetric = null;
 let installPrompt = null;
 const todayKey = localDateKey();
 ensureDataShape();
+if(data.campaign.name==='Operation Visible Abs'){data.campaign.name='Visible Abs';persist();}
 seedProtocol();
 
 function localDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
@@ -27,8 +28,8 @@ function getDay(key = todayKey) { if (!data.days[key]) data.days[key] = { quests
 function loadData() { try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY)); return parsed?.days ? parsed : emptyData(); } catch { return emptyData(); } }
 function ensureDataShape() {
   data.schemaVersion = SCHEMA_VERSION;
-  data.campaign ||= { name: 'Operation Visible Abs', startingWeight: null, targetWeight: null };
-  data.campaign.name ||= 'Operation Visible Abs';
+  data.campaign ||= { name: 'Visible Abs', startingWeight: null, targetWeight: null };
+  data.campaign.name ||= 'Visible Abs';
   Object.values(data.days).forEach(day => { day.quests ||= []; day.metrics ||= {}; });
 }
 function seedProtocol() {
@@ -103,11 +104,15 @@ document.querySelector('#addQuestButton').addEventListener('click',()=>{document
 document.querySelector('#questForm').addEventListener('submit',e=>{e.preventDefault();const name=document.querySelector('#questName').value.trim();if(!name)return;getDay().quests.push({id:crypto.randomUUID?.()||`${Date.now()}`,name,xp:Number(document.querySelector('#questXp').value),completed:false});saveData();document.querySelector('#questDialog').close();toast('Quest added');});
 document.querySelectorAll('[data-open-metric]').forEach(button=>button.addEventListener('click',()=>{selectedMetric=button.dataset.openMetric;const cfg=METRICS[selectedMetric],input=document.querySelector('#metricInput');document.querySelector('#metricTitle').textContent=cfg.title;document.querySelector('#metricLabel').textContent=cfg.label;input.min=cfg.min;input.max=cfg.max;input.step=cfg.step;input.value=getDay().metrics?.[selectedMetric]??'';document.querySelector('#metricDialog').showModal();}));
 document.querySelector('#metricForm').addEventListener('submit',e=>{e.preventDefault();const input=document.querySelector('#metricInput'),value=Number(input.value),cfg=METRICS[selectedMetric];if(!Number.isFinite(value)||value<cfg.min||value>cfg.max)return;getDay().metrics[selectedMetric]=value;if(selectedMetric==='weight'&&!data.campaign.startingWeight)data.campaign.startingWeight=value;saveData();document.querySelector('#metricDialog').close();showXp(5);toast('Log saved');});
-document.querySelector('#campaignForm').addEventListener('submit',e=>{e.preventDefault();data.campaign.name=document.querySelector('#campaignNameInput').value.trim()||'Operation Visible Abs';data.campaign.startingWeight=Number(document.querySelector('#startingWeightInput').value)||null;data.campaign.targetWeight=Number(document.querySelector('#targetWeightInput').value)||null;saveData();toast('Campaign saved');});
+document.querySelector('#campaignForm').addEventListener('submit',e=>{e.preventDefault();data.campaign.name=document.querySelector('#campaignNameInput').value.trim()||'Visible Abs';data.campaign.startingWeight=Number(document.querySelector('#startingWeightInput').value)||null;data.campaign.targetWeight=Number(document.querySelector('#targetWeightInput').value)||null;saveData();toast('Campaign saved');});
 document.querySelector('#dismissLevelUp').addEventListener('click',()=>document.querySelector('#levelUpOverlay').hidden=true);
 document.querySelector('#exportButton').addEventListener('click',()=>{const payload={...data,exportedAt:new Date().toISOString(),app:'GoalRPG'};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`goalrpg-backup-${todayKey}.json`;a.click();URL.revokeObjectURL(url);toast('Backup exported');});
-document.querySelector('#importInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const restored=JSON.parse(await file.text());if(!restored.days)throw new Error();data=restored;ensureDataShape();persist();renderAll();document.querySelector('#storageStatus').textContent=`Restored ${Object.keys(data.days).length} days.`;toast('Backup restored');}catch{document.querySelector('#storageStatus').textContent='Invalid GoalRPG backup.';}e.target.value='';});
+document.querySelector('#importInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const restored=JSON.parse(await file.text());if(!restored.days)throw new Error();data=restored;ensureDataShape();
+if(data.campaign.name==='Operation Visible Abs'){data.campaign.name='Visible Abs';persist();}persist();renderAll();document.querySelector('#storageStatus').textContent=`Restored ${Object.keys(data.days).length} days.`;toast('Backup restored');}catch{document.querySelector('#storageStatus').textContent='Invalid GoalRPG backup.';}e.target.value='';});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;document.querySelector('#installButton').classList.remove('hidden');});
 document.querySelector('#installButton').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;document.querySelector('#installButton').classList.add('hidden');});
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 renderAll();
+function previewReminder(){const el=document.querySelector('#notificationPreview');el.classList.add('show');clearTimeout(previewReminder.timer);previewReminder.timer=setTimeout(()=>el.classList.remove('show'),4200);}
+document.querySelector('#previewNotificationButton').addEventListener('click',previewReminder);
+setTimeout(previewReminder,900);

@@ -3,25 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#171522">
+  <meta name="theme-color" content="#bcecff">
   <meta name="description" content="GoalRPG is a retro campaign manager for completing your daily protocol.">
-  <link rel="manifest" href="manifest.webmanifest?v=21">
+  <link rel="manifest" href="manifest.webmanifest?v=22">
   <link rel="icon" href="icons/goalrpg.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/goalrpg.png">
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=22">
   <title>GoalRPG</title>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#today"><img src="icons/goalrpg.png" alt=""><span><strong>GoalRPG</strong><small>Campaign Manager</small></span></a>
     <div class="mini-level"><span>LV <b id="headerLevel">1</b></span><div><i id="headerXpBar"></i></div></div>
-    <button id="installButton" class="pixel-button secondary hidden" type="button">Install</button>
+    <button id="previewNotificationButton" class="pixel-button secondary reminder-button" type="button">Reminder</button><button id="installButton" class="pixel-button secondary hidden" type="button">Install</button>
   </header>
 
   <main>
     <section id="today" class="view active" aria-labelledby="todayTitle">
       <section class="campaign-card pixel-panel">
-        <div class="campaign-copy"><p class="kicker">Active campaign</p><h1 id="campaignName">Operation Visible Abs</h1><p id="todayDate" class="campaign-date"></p><p class="directive">Complete today's protocol.</p></div>
+        <div class="campaign-copy"><p class="kicker">Active campaign</p><h1 id="campaignName">Visible Abs</h1><p id="todayDate" class="campaign-date"></p><p class="directive">Complete today's protocol.</p></div>
         <div class="level-block"><span>Level</span><strong id="levelNumber">1</strong><small id="levelName">Starting Out</small></div>
         <div class="xp-block"><div class="bar-label"><span>Experience</span><b id="xpLabel">0 / 50 XP</b></div><div class="progress xp-progress"><i id="xpProgress"></i><em></em></div></div>
         <div class="campaign-stats">
@@ -94,8 +94,9 @@
   <dialog id="metricDialog"><form id="metricForm" method="dialog"><div class="dialog-head"><div><p class="kicker">Quick log</p><h2 id="metricTitle">Log metric</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label><span id="metricLabel">Value</span><input id="metricInput" required type="number" inputmode="decimal"></label><button class="pixel-button full" value="default" type="submit">Save</button></form></dialog>
 
   <div id="xpBurst" class="xp-burst" aria-hidden="true"></div>
+  <aside id="notificationPreview" class="notification-preview" role="status" aria-live="polite"><img src="icons/goalrpg.png" alt=""><div><span>GOALRPG <small>now</small></span><strong>Reminder</strong><p>Gym</p></div></aside>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="levelUpOverlay" class="level-up-overlay" hidden><div><p>LEVEL UP</p><strong id="levelUpNumber">2</strong><button id="dismissLevelUp" class="pixel-button" type="button">Continue</button></div></div>
-  <script src="app.js?v=21" defer></script>
+  <script src="app.js?v=22" defer></script>
 </body>
 </html>
