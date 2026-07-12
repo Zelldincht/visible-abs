@@ -70,8 +70,8 @@ function toast(message) { const el=document.querySelector('#toast'); el.textCont
 function haptic(pattern=18) { navigator.vibrate?.(pattern); }
 let audioContext;
 let audioUnlocked=false;
-async function unlockAudio(){ try { audioContext ||= new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'}); if(audioContext.state!=='running')await audioContext.resume(); if(!audioUnlocked){const buffer=audioContext.createBuffer(1,1,22050),source=audioContext.createBufferSource(),gain=audioContext.createGain();gain.gain.value=.0001;source.buffer=buffer;source.connect(gain).connect(audioContext.destination);source.start(0);audioUnlocked=true;} return audioContext.state==='running'; } catch { return false; } }
-function playNotes(notes,type='square',volume=.1){ unlockAudio().then(running=>{if(!running)return;const ctx=audioContext,start=ctx.currentTime+.025;notes.forEach(([frequency,offset,duration])=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,start+offset);gain.gain.setValueAtTime(volume,start+offset);gain.gain.exponentialRampToValueAtTime(.001,start+offset+duration);osc.connect(gain).connect(ctx.destination);osc.start(start+offset);osc.stop(start+offset+duration);});}); }
+function unlockAudio(){try{const AudioEngine=window.AudioContext||window.webkitAudioContext;if(!AudioEngine)return false;if(!audioContext){try{audioContext=new AudioEngine();}catch{audioContext=new AudioEngine;}}if(audioContext.state==='suspended')audioContext.resume();if(!audioUnlocked){const buffer=audioContext.createBuffer(1,1,22050),source=audioContext.createBufferSource(),gain=audioContext.createGain();gain.gain.value=.0001;source.buffer=buffer;source.connect(gain).connect(audioContext.destination);source.start(0);audioUnlocked=true;}return true;}catch{return false;}}
+function playNotes(notes,type='square',volume=.1){if(!unlockAudio())return false;const ctx=audioContext,start=ctx.currentTime+.035;notes.forEach(([frequency,offset,duration])=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(frequency,start+offset);gain.gain.setValueAtTime(volume,start+offset);gain.gain.exponentialRampToValueAtTime(.001,start+offset+duration);osc.connect(gain).connect(ctx.destination);osc.start(start+offset);osc.stop(start+offset+duration);});return true;}
 function playQuestSound(){playNotes([[659,0,.11],[880,.11,.16]],'square',.09);}
 function playLevelSound(){playNotes([[523,0,.16],[659,.14,.16],[784,.28,.2],[1047,.46,.42]],'square',.12);}
 function playAchievementSound(){playNotes([[784,0,.13],[988,.12,.13],[1175,.24,.17],[1568,.41,.36]],'triangle',.14);}
@@ -126,7 +126,8 @@ renderAll();
 function previewReminder(){const el=document.querySelector('#notificationPreview');el.classList.add('show');clearTimeout(previewReminder.timer);previewReminder.timer=setTimeout(()=>el.classList.remove('show'),4200);}
 document.querySelector('#previewNotificationButton').addEventListener('click',previewReminder);
 document.addEventListener('pointerdown',unlockAudio,{capture:true,once:true});
-document.addEventListener('touchend',unlockAudio,{capture:true,once:true});
-document.querySelector('#soundTestButton').addEventListener('click',async()=>{const ready=await unlockAudio();if(ready){playLevelSound();toast('Sound is on');}else toast('Sound is blocked');});
+document.addEventListener('touchstart',unlockAudio,{capture:true,once:true,passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&audioContext?.state==='suspended')audioContext.resume();});
+document.querySelector('#soundTestButton').addEventListener('click',()=>{if(playNotes([[523,0,.16],[659,.14,.16],[784,.28,.2],[1047,.46,.42]],'square',.12)){toast('Sound test playing');}else toast('Sound is unavailable');});
 setTimeout(previewReminder,900);
 setTimeout(checkNewAchievements,1900);
